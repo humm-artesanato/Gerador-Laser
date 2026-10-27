@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gerador de caixas a laser – MDF 3 mm</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#faf6f0;--card:#fff;--tx:#2b2620;--mut:#7a7064;--bd:#e2d9cc;--ac:#8a5a2b;--acx:#fff;--pv:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1713;--card:#26211c;--tx:#efe7dc;--mut:#a39787;--bd:#3a332b;--ac:#d9a066;--acx:#1b1713;--pv:#f4efe8}}
+:root[data-theme="dark"]{--bg:#1b1713;--card:#26211c;--tx:#efe7dc;--mut:#a39787;--bd:#3a332b;--ac:#d9a066;--acx:#1b1713;--pv:#f4efe8}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:0 0 2px}p.s{margin:0 0 14px;color:var(--mut)}
+.g{display:grid;gap:14px;grid-template-columns:300px 1fr}@media(max-width:760px){.g{grid-template-columns:1fr}}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px}
+label{display:block;font-size:13px;color:var(--mut);margin-top:10px}
+input,select{width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+button{padding:9px 12px;border:0;border-radius:8px;background:var(--ac);color:var(--acx);font:inherit;cursor:pointer;margin:8px 6px 0 0}
+button.o{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.pv{background:var(--pv);border-radius:8px;overflow-x:auto;border:1px solid var(--bd)}.pv svg{display:block;height:auto}
+.vt{display:flex;gap:8px;align-items:center;margin-bottom:8px}.vt button{margin:0}
+.zb{display:flex;align-items:center;gap:8px;margin-bottom:8px}.zb button{margin:0}.zb input{flex:1;width:auto;padding:0}.zb span{min-width:42px;text-align:right;font-size:13px;color:var(--mut)}
+.i{font-size:13px;color:var(--mut);margin-top:10px}.w{color:#b3261e;font-size:13px;margin-top:8px}
+</style>
+</head>
+<body><main>
+<h1>Gerador de caixas a laser</h1>
+<p class="s">MDF 3 mm · medidas em mm · saída em SVG (vermelho = corte)</p>
+<div class="g">
+<div class="c">
+<label>Tipo de caixa<select id="tp"><option value="bs">Caixas basculantes</option><option value="cf">Caixa fechada</option></select></label>
+<label>Variação<select id="vr"><option value="lat">Dobradiça lateral</option><option value="tr">Dobradiça traseira</option></select></label>
+<label>Medidas informadas<select id="un"><option value="int">Internas</option><option value="ext">Externas</option></select></label>
+<label id="lLid">Tampa<select id="lid"><option value="yes">Com tampa</option><option value="no">Sem tampa (topo liso)</option></select></label>
+<label><span id="tLi">Largura interna</span><input id="Li" type="number" value="100" min="20"></label>
+<label><span id="tPi">Profundidade interna</span><input id="Pi" type="number" value="150" min="60"></label>
+<label><span id="tAi">Altura interna total (tampa fechada)</span><input id="Ai" type="number" value="30" min="20"></label>
+<label id="lHl"><span id="tHl">Altura interna da tampa</span><input id="Hl" type="number" value="10" min="5"></label>
+<label id="lPm">Raio do pino da dobradiça (× espessura, mín. 1,2)<input id="pm" type="number" step="0.1" value="1.3" min="1.2"></label>
+<label id="lSm">Anel da dobradiça (× espessura, mín. 0,6)<input id="sm" type="number" step="0.1" value="1" min="0.6"></label>
+<label id="lNh">Divisórias horizontais (ao longo da largura)<input id="nh" type="number" value="0" min="0" max="12"></label>
+<label id="lNv">Divisórias verticais (ao longo da profundidade)<input id="nv" type="number" value="0" min="0" max="12"></label>
+<label id="lHd"><span id="thd">Altura das divisórias</span><input id="hd" type="number" placeholder="máx." min="12"></label>
+<label id="lDt">Fixar divisórias também na tampa<select id="dt"><option value="no">Não</option><option value="yes">Sim (altura total)</option></select></label>
+<label id="lW"><span id="tw">Largura alvo dos dentes</span><input id="w" type="number" value="10" min="5"></label>
+<label>Chapa: largura máx. (mm)<input id="sw" type="number" value="380" min="100"></label>
+<label>Chapa: altura máx. (mm)<input id="sh" type="number" value="300" min="100"></label>
+<label id="lMode">Modo de corte<select id="mode"><option value="sep">Peças separadas</option><option value="mid">Agrupado (meio-termo)</option><option value="uni">Aproveitamento de corte (linha comum)</option></select></label>
+<div class="i" id="info"></div><div class="w" id="warn"></div>
+<button id="dl">Baixar SVG</button><button class="o" id="cp">Copiar SVG</button>
+</div>
+<div class="c"><div class="vt"><button id="v2">Planificação</button><button class="o" id="v3">3D</button><label id="lop" style="display:none;margin:0 0 0 auto">Abrir tampa <input id="lo" type="range" min="0" max="110" value="0" style="width:120px"></label></div><div class="zb" id="zb"><button class="o" id="zm">−</button><input id="zs" type="range" min="10" max="200" step="5" value="100"><button class="o" id="zp">+</button><span id="zv">100%</span></div><div class="pv" id="pv"></div><div class="pv" id="cv" style="display:none;overflow:hidden"></div><div class="i" id="cvm" style="display:none;padding:14px">A visualização 3D ainda não está disponível para este tipo de caixa (dobradiça embutida).</div></div>
+</div></main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const T=3,$=id=>document.getElementById(id);
+const odd=(L,w)=>Math.max(3,2*Math.round((L/w-1)/2)+1);
+// aresta com dentes: F=true começa projetando (o=normal externa)
+function fe(p,q,n,F,o){const r=[];for(let i=0;i<n;i++){const k=((i%2==0)==F)?T:0;
+ for(const u of[i/n,(i+1)/n])r.push([p[0]+(q[0]-p[0])*u+o[0]*k,p[1]+(q[1]-p[1])*u+o[1]*k]);}return r}
+const circ=(cx,cy,r,a0=0,a1=360,n=40)=>{const r_=[];for(let i=0;i<=n;i++){const a=(a0+(a1-a0)*i/n)*Math.PI/180;r_.push([cx+r*Math.cos(a),cy+r*Math.sin(a)])}return r_};
+const rect=(cx,cy,w,h)=>[[cx-w/2,cy-h/2],[cx+w/2,cy-h/2],[cx+w/2,cy+h/2],[cx-w/2,cy+h/2]];
+const mir=s=>({...s,pts:s.pts.map(p=>[-p[0],p[1]]),holes:s.holes.map(h=>h.map(p=>[-p[0],p[1]]))});
+
+function build(P){
+ const{Li,Pi,Ai,Hl,w}=P,a=Li/2,b=Pi/2,hx=a+T,R=b+T,Hlid=Hl+T,Hw=Ai+2*T-Hlid,Hb=Hw-T;
+ const nL=odd(Pi,w),nS=odd(Li,w),nE=odd(Hb,w),nW=odd(Li+2*T,w);
+ const S=[],D=mkDiv(P,a,b,Hb);
+ S.push({n:'Fundo',c:1,pts:[...fe([-a,-b],[a,-b],nS,false,[0,-1]),...fe([a,-b],[a,b],nL,false,[1,0]),...fe([a,b],[-a,b],nS,false,[0,1]),...fe([-a,b],[-a,-b],nL,false,[-1,0])],holes:[]});
+ const lw={n:'Lateral longa da base',c:1,pts:[[-b-T,-T],...fe([-b,0],[b,0],nL,true,[0,-1]),[b+T,-T],[b+T,0],...fe([b,0],[b,Hb],nE,false,[1,0]),...fe([-b,Hb],[-b,0],nE,false,[-1,0]),[-b-T,0]],holes:[rect(-(b-5),Hb-8,3,5)]};
+ lw.holes.push(...D.lwHoles);S.push(lw,{...mir(lw)});
+ S.push({n:'Lateral curta da base',c:2,pts:[...fe([-a,0],[a,0],nS,true,[0,-1]),[a,0],...fe([a,0],[a,Hb],nE,true,[1,0]),[a,Hb],[-a,Hb],...fe([-a,Hb],[-a,0],nE,true,[-1,0]),[-a,0]],holes:[]});
+ S.push({n:'Tampa (topo)',c:1,pts:[...fe([-hx,-b],[hx,-b],nW,true,[0,-1]),...fe([hx,-b],[hx,b],nL,false,[1,0]),...fe([hx,b],[-hx,b],nW,false,[0,1]),...fe([-hx,b],[-hx,-b],nL,false,[-1,0])],holes:[]});
+ const top=fe([b,Hl],[-b,Hl],nL,true,[0,1]);top[0][0]=R;top[top.length-1][0]=-R;
+ const cx=-R+8,tx=cx+8*Math.SQRT1_2,ty=-8-8*Math.SQRT1_2;
+ const ls={n:'Lateral da tampa (orelha)',c:1,pts:[[R,0],...top,[-R,-8],...circ(cx,-8,8,180,315,24),[tx-ty,0]],holes:[circ(cx,-8,5.18,0,360,36)]};
+ S.push(ls,mir(ls));
+ const fr=(r,F)=>[[-hx,0],[hx,0],[hx,r],...fe([hx,r],[-hx,r],nW,F,[0,1]),[-hx,r]];
+ S.push({n:'Frente da tampa',c:1,pts:fr(Hl,true),holes:[]},{n:'Fundo da tampa (traseira)',c:1,pts:fr(Hl-3.148,false),holes:[]});
+ S.push({n:'Disco do pino',c:2,pts:circ(0,0,5,0,360,36).slice(0,-1),holes:[rect(0,0,3,5)]});
+ S.push({n:'Presilha do pino',c:2,pts:rect(0,0,6,5),holes:[]});
+ S[0].holes=D.plateHoles;S[3].holes=D.swHoles;S.push(...D.pieces);return{D,S,nL,nS,nE,Hb,Hw,Hlid,ext:[Li+2*T,Pi+2*T,Ai+2*T],lidW:Li+4*T,a,b,hx,Hl,Hr:Hl-3.148,T};
+}
+const key=p=>Math.round(p[0]*1000)+','+Math.round(p[1]*1000);
+// une polígonos adjacentes: remove segmentos coincidentes e encadeia o restante
+function unite(polys){
+ const cnt=new Map(),segs=[],all=polys.flat(),E=1e-3;
+ const split=pl=>{const r=[];for(let i=0;i<pl.length;i++){const p=pl[i],q=pl[(i+1)%pl.length];r.push(p);
+  const v=Math.abs(p[0]-q[0])<E,h=Math.abs(p[1]-q[1])<E,m=v?1:0;if(!v&&!h)continue;
+  const lo=Math.min(p[m],q[m]),hi=Math.max(p[m],q[m]);
+  const mid=all.filter(z=>Math.abs(z[1-m]-p[1-m])<E&&z[m]>lo+E&&z[m]<hi-E).sort((x,y)=>(x[m]-y[m])*(q[m]>p[m]?1:-1));r.push(...mid)}return r};
+ polys=polys.map(split);
+ for(const pl of polys)for(let i=0;i<pl.length;i++){const p=pl[i],q=pl[(i+1)%pl.length],kp=key(p),kq=key(q);if(kp==kq)continue;
+  const k=kp<kq?kp+'|'+kq:kq+'|'+kp;cnt.set(k,(cnt.get(k)||0)+1);segs.push([p,q,k])}
+ const seen=new Set(),keep=segs.filter(s=>!seen.has(s[2])&&seen.add(s[2])),adj=new Map();
+ keep.forEach((s,i)=>{for(const p of[s[0],s[1]]){const k=key(p);if(!adj.has(k))adj.set(k,[]);adj.get(k).push(i)}});
+ const used=new Set(),out=[];
+ for(let i=0;i<keep.length;i++){if(used.has(i))continue;used.add(i);const path=[keep[i][0],keep[i][1]];
+  for(let dir=0;dir<2;dir++){for(;;){const k=key(path[path.length-1]),nx=(adj.get(k)||[]).find(j=>!used.has(j));if(nx===undefined)break;
+    used.add(nx);const q=keep[nx];path.push(key(q[0])==k?q[1]:q[0])}if(!dir)path.reverse()}
+  const closed=key(path[0])==key(path[path.length-1]);if(closed)path.pop();out.push({pts:path,closed})}
+ return out}
+function mkItems(B,mode){const hc='#ff0000';
+ const R='#ff0000',{S,a,b,hx,Hl,Hr,T}=B,I=[];
+ const one=(s)=>({paths:[{pts:s.pts,color:R,closed:true},...s.holes.map(h=>({pts:h,color:hc,closed:true}))]});
+ if(mode=='sep'){S.forEach(s=>{for(let k=0;k<s.c;k++)I.push(one(s))});return I}
+ const group=parts=>{const P=[];parts.forEach(([s,f])=>{P.push({pts:s.pts.map(f),color:R})});
+  const paths=unite(P.map(p=>p.pts)).map(p=>({...p,color:R}));
+  parts.forEach(([s,f])=>s.holes.forEach(h=>paths.push({pts:h.map(f),color:hc,closed:true})));return{paths}};
+ const id=p=>p;
+ if(mode=='mid'){const rot=g=>({paths:g.paths.map(p=>({...p,pts:p.pts.map(([x,y])=>[-y,x])}))}),Hb=B.Hb;
+  I.push(rot(group([[S[0],id],[S[1],([u,v])=>[a+T+v,u]],[S[1],([u,v])=>[-(a+T+v),u]]])));
+  I.push(group([[S[4],id],[S[5],([u,v])=>[hx+T+(Hl-v),u]],[S[5],([u,v])=>[-(hx+T+(Hl-v)),u]]]));
+  I.push(group([[S[3],id],[S[3],([x,v])=>[x,2*Hb-v]]]));
+  I.push(group([[S[7],id],[S[8],([x,y])=>[x,-y]]]));
+  for(let k=0;k<2;k++){I.push(one(S[9]));I.push(one(S[10]))}S.slice(11).forEach(s=>{for(let q=0;q<s.c;q++)I.push(one(s))});
+  return I}
+ I.push(group([[S[0],id],[S[1],([u,v])=>[a+T+v,u]],[S[1],([u,v])=>[-(a+T+v),u]],[S[3],([x,v])=>[x,b+T+v]],[S[3],([x,v])=>[x,-(b+T+v)]]]));
+ I.push(group([[S[4],id],[S[5],([u,v])=>[hx+T+(Hl-v),u]],[S[5],([u,v])=>[-(hx+T+(Hl-v)),u]],[S[7],([x,v])=>[x,b+T+(Hl-v)]],[S[8],([x,v])=>[x,-(b+T+(Hr-v))]]]));
+ for(let k=0;k<2;k++){I.push(one(S[9]));I.push(one(S[10]))}S.slice(11).forEach(s=>{for(let q=0;q<s.c;q++)I.push(one(s))});
+ return I}
+function layout(items,maxW){
+ items.forEach(it=>{const a=it.paths.flatMap(p=>p.pts);it.bb=[Math.min(...a.map(p=>p[0])),Math.min(...a.map(p=>p[1])),Math.max(...a.map(p=>p[0])),Math.max(...a.map(p=>p[1]))]});
+ items.sort((p,q)=>(q.bb[3]-q.bb[1])-(p.bb[3]-p.bb[1]));
+ const g=4;let x=g,y=g,rh=0,W=0;const out=[];
+ for(const it of items){const w=it.bb[2]-it.bb[0],h=it.bb[3]-it.bb[1];
+  if(x+w+g>maxW&&x>g){x=g;y+=rh+g;rh=0}
+  out.push({it,tx:x-it.bb[0],ty:y+it.bb[3]});x+=w+g;rh=Math.max(rh,h);W=Math.max(W,x)}
+ return{out,W,H:y+rh+g}}
+const d=(pts,tx,ty,z)=>'M'+pts.map(p=>(p[0]+tx).toFixed(3)+' '+(ty-p[1]).toFixed(3)).join(' L')+(z?' Z':'');
+function svg(L,pv){
+ let body='';
+ for(const{it,tx,ty}of L.out)for(const p of it.paths)body+=`<path stroke="${p.color}" stroke-width="${pv?1.6:0.1}"${pv?' vector-effect="non-scaling-stroke"':''} fill="none" d="${d(p.pts,tx,ty,p.closed)}"/>`;
+ return`<svg xmlns="http://www.w3.org/2000/svg" width="${L.W.toFixed(2)}mm" height="${L.H.toFixed(2)}mm" viewBox="0 0 ${L.W.toFixed(2)} ${L.H.toFixed(2)}">${body}</svg>`}
+let cur='',pu='int',pt='hg',pl=true;
+const posn=(len,n)=>{const c=(len-n*T)/(n+1);return Array.from({length:n},(_,k)=>-len/2+(k+1)*c+(k+0.5)*T)};
+function tabsAlong(L,w,avoid){const n=odd(L,w),s=L/n,r=[];for(let i=1;i<n;i+=2){const t0=-L/2+i*s,t1=t0+s;if(!avoid.some(c=>t1>c-T/2-1&&t0<c+T/2+1))r.push([t0,t1])}return r}
+// divisórias: encaixam por dentes em slots (laterais e fundo) e se cruzam por meio-corte
+function mkDiv(P,a,b,Hc){
+ const{Li,Pi,w}=P,nh=P.nh||0,nv=P.nv||0,hd=P.dTop?Hc:Math.min(P.hd||Hc,Hc),pieces=[],pH=[],lwH=[],swH=[],tH=[],o={pieces,plateHoles:pH,lwHoles:lwH,swHoles:swH,topHoles:tH};
+ if(!(nh+nv)||hd<12)return o;
+ const ys=posn(Pi,nh),xs=posn(Li,nv),nE=odd(hd,w),sE=hd/nE,et=[],dt=!!P.dTop;o.ys=ys;o.xs=xs;
+ for(let i=1;i<nE;i+=2)et.push([i*sE,(i+1)*sE]);
+ const topEdge=(tabs,notches)=>{const ev=[...tabs.map(t=>({t:1,a:t[0],b:t[1]})),...notches.map(c=>({t:0,a:c-T/2,b:c+T/2}))].sort((p,q)=>q.b-p.b),r=[];
+  ev.forEach(e=>{if(e.t)r.push([e.b,hd],[e.b,hd+T],[e.a,hd+T],[e.a,hd]);else r.push([e.b,hd],[e.b,hd/2],[e.a,hd/2],[e.a,hd])});return r};
+ if(nh){const nB=odd(Li,w),tb=tabsAlong(Li,w,[]),tt=dt?tabsAlong(Li,w,xs):[];
+  pieces.push({n:'Divisória horizontal',c:nh,pts:[...fe([-a,0],[a,0],nB,false,[0,-1]),...fe([a,0],[a,hd],nE,false,[1,0]),...topEdge(tt,xs),...fe([-a,hd],[-a,0],nE,false,[-1,0])],holes:[]});
+  ys.forEach(y=>{tb.forEach(([t0,t1])=>pH.push(rect((t0+t1)/2,y,t1-t0,T)));tt.forEach(([t0,t1])=>tH.push(rect((t0+t1)/2,y,t1-t0,T)));et.forEach(([v0,v1])=>lwH.push(rect(y,(v0+v1)/2,T,v1-v0)))})}
+ if(nv){const nB=odd(Pi,w),tbv=tabsAlong(Pi,w,ys),ttv=dt?tabsAlong(Pi,w,[]):[],ev=[];
+  tbv.forEach(t=>ev.push({t:1,a:t[0],b:t[1]}));ys.forEach(c=>ev.push({t:0,a:c-T/2,b:c+T/2}));ev.sort((p,q)=>p.a-q.a);
+  const bot=[[-b,0]];ev.forEach(e=>{if(e.t)bot.push([e.a,0],[e.a,-T],[e.b,-T],[e.b,0]);else bot.push([e.a,0],[e.a,hd/2],[e.b,hd/2],[e.b,0])});bot.push([b,0]);
+  pieces.push({n:'Divisória vertical',c:nv,pts:[...bot,...fe([b,0],[b,hd],nE,false,[1,0]),...topEdge(ttv,[]),...fe([-b,hd],[-b,0],nE,false,[-1,0])],holes:[]});
+  xs.forEach(x=>{tbv.forEach(([t0,t1])=>pH.push(rect(x,(t0+t1)/2,T,t1-t0)));ttv.forEach(([t0,t1])=>tH.push(rect(x,(t0+t1)/2,T,t1-t0)));et.forEach(([v0,v1])=>swH.push(rect(x,(v0+v1)/2,T,v1-v0)))})}
+ return o}
+function buildClosed(P){
+ const{Li,Pi,Ai,w}=P,lid=P.lid!==false,a=Li/2,b=Pi/2,H=Ai,nL=odd(Pi,w),nS=odd(Li,w),nE=odd(H,w),D=mkDiv(P,a,b,H);
+ const pl=h=>({c:1,pts:[...fe([-a,-b],[a,-b],nS,false,[0,-1]),...fe([a,-b],[a,b],nL,false,[1,0]),...fe([a,b],[-a,b],nS,false,[0,1]),...fe([-a,b],[-a,-b],nL,false,[-1,0])],holes:h});
+ const lw={c:2,pts:[[-b-T,-T],...fe([-b,0],[b,0],nL,true,[0,-1]),[b+T,-T],[b+T,0],...fe([b,0],[b,H],nE,false,[1,0]),...(lid?[[b+T,H],[b+T,H+T],...fe([b,H],[-b,H],nL,true,[0,1]),[-b-T,H+T],[-b-T,H]]:[]),...fe([-b,H],[-b,0],nE,false,[-1,0]),[-b-T,0]],holes:D.lwHoles};
+ const sw={c:2,pts:[...fe([-a,0],[a,0],nS,true,[0,-1]),[a,0],...fe([a,0],[a,H],nE,true,[1,0]),[a,H],...(lid?fe([a,H],[-a,H],nS,true,[0,1]):[]),[-a,H],...fe([-a,H],[-a,0],nE,true,[-1,0]),[-a,0]],holes:D.swHoles};
+ return{S:[pl(D.plateHoles),lw,sw,...(lid?[pl(D.topHoles)]:[]),...D.pieces],a,b,H,nL,nS,nE,lid,D,nD:D.pieces.length}}
+function mkItemsC(B,mode){
+ const R='#ff0000',{S,a,b,H,lid}=B,base=lid?4:3,id=p=>p,I=[];
+ const one=s=>({paths:[{pts:s.pts,color:R,closed:true},...s.holes.map(h=>({pts:h,color:R,closed:true}))]});
+ const g=parts=>({paths:[...unite(parts.map(([s,f])=>s.pts.map(f))).map(p=>({...p,color:R})),...parts.flatMap(([s,f])=>s.holes.map(h=>({pts:h.map(f),color:R,closed:true})))]});
+ const rot=q=>({paths:q.paths.map(p=>({...p,pts:p.pts.map(([x,y])=>[-y,x])}))});
+ const RW=([u,v])=>[a+T+v,u],LW=([u,v])=>[-(a+T+v),u],TS=([x,v])=>[x,b+T+v],BS=([x,v])=>[x,-(b+T+v)];
+ const loose=()=>S.slice(base).forEach(s=>{for(let k=0;k<s.c;k++)I.push(one(s))});
+ if(mode=='sep'){S.forEach(s=>{for(let k=0;k<s.c;k++)I.push(one(s))});return I}
+ if(mode=='mid'){I.push(rot(g([[S[0],id],[S[1],RW],[S[1],LW]])));
+  I.push(lid?g([[S[3],id],[S[2],TS],[S[2],BS]]):g([[S[2],id],[S[2],([x,v])=>[x,2*H-v]]]));loose();return I}
+ I.push(g([[S[0],id],[S[1],RW],[S[1],LW],[S[2],TS],[S[2],BS],...(lid?[[S[3],([x,y])=>[x,y+2*b+2*T+H]]]:[])]));loose();return I}
+function maxrects(src,mw,mh){
+ const g=2,items=src.map(it=>{const a=it.paths.flatMap(p=>p.pts),xs=a.map(p=>p[0]),ys=a.map(p=>p[1]);return{it,bb:[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)]}});
+ items.sort((p,q)=>(q.bb[2]-q.bb[0])*(q.bb[3]-q.bb[1])-(p.bb[2]-p.bb[0])*(p.bb[3]-p.bb[1]));
+ let free=[{x:0,y:0,w:mw,h:mh}];const out=[];let W=0,H=0;
+ for(const{it,bb}of items){let best=null;
+  for(const rot of[0,1]){const w=(rot?bb[3]-bb[1]:bb[2]-bb[0])+g,h=(rot?bb[2]-bb[0]:bb[3]-bb[1])+g;
+   for(const f of free)if(w<=f.w+1e-6&&h<=f.h+1e-6){const sc=Math.min(f.w-w,f.h-h);if(!best||sc<best.sc)best={sc,x:f.x,y:f.y,w,h,rot}}}
+  if(!best)return null;
+  const P=best,nf=[];
+  for(const f of free){if(P.x>=f.x+f.w||P.x+P.w<=f.x||P.y>=f.y+f.h||P.y+P.h<=f.y){nf.push(f);continue}
+   if(P.x>f.x)nf.push({x:f.x,y:f.y,w:P.x-f.x,h:f.h});
+   if(P.x+P.w<f.x+f.w)nf.push({x:P.x+P.w,y:f.y,w:f.x+f.w-P.x-P.w,h:f.h});
+   if(P.y>f.y)nf.push({x:f.x,y:f.y,w:f.w,h:P.y-f.y});
+   if(P.y+P.h<f.y+f.h)nf.push({x:f.x,y:P.y+P.h,w:f.w,h:f.y+f.h-P.y-P.h})}
+  free=nf.filter((f,i)=>!nf.some((q,j)=>j!==i&&f.x>=q.x-1e-6&&f.y>=q.y-1e-6&&f.x+f.w<=q.x+q.w+1e-6&&f.y+f.h<=q.y+q.h+1e-6&&(j<i||f.w*f.h<q.w*q.h-1e-6||true)&&!(j>i&&Math.abs(f.w*f.h-q.w*q.h)<1e-6)));
+  const item=P.rot?{paths:it.paths.map(p=>({...p,pts:p.pts.map(([x,y])=>[y,-x])}))}:it;
+  const b2=P.rot?[bb[1],-bb[2],bb[3],-bb[0]]:bb;
+  out.push({it:item,tx:P.x+g/2-b2[0],ty:P.y+g/2+b2[3]});
+  W=Math.max(W,P.x+P.w);H=Math.max(H,P.y+P.h)}
+ return{out,W,H}}
+let view='2d',lastB=null,last3=null;
+function mk3(){
+ const el=$('cv');if(el._r)return el._r;if(typeof THREE=='undefined')return null;
+ const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));el.appendChild(renderer.domElement);
+ const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,1,1,6000);camera.up.set(0,0,1);
+ scene.add(new THREE.AmbientLight(0xffffff,0.7));const l1=new THREE.DirectionalLight(0xffffff,0.8);l1.position.set(1,1.5,2);scene.add(l1);
+ const l2=new THREE.DirectionalLight(0xffffff,0.35);l2.position.set(-1,-1,0.6);scene.add(l2);
+ const grp=new THREE.Group();scene.add(grp);
+ const r=el._r={renderer,scene,camera,grp,az:1.0,el:0.55,dist:400,tgt:new THREE.Vector3()};
+ r.draw=()=>{const t=r.tgt,ce=Math.cos(r.el);camera.position.set(t.x+r.dist*ce*Math.cos(r.az),t.y+r.dist*ce*Math.sin(r.az),t.z+r.dist*Math.sin(r.el));camera.lookAt(t);renderer.render(scene,camera)};
+ const cv=renderer.domElement,P=new Map();cv.style.cssText='display:block;width:100%;touch-action:none;cursor:grab';
+ cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY])});
+ cv.addEventListener('pointermove',e=>{const p=P.get(e.pointerId);if(!p)return;const q=[e.clientX,e.clientY];
+  if(P.size==1){r.az-=(q[0]-p[0])*0.008;r.el=Math.max(-1.5,Math.min(1.5,r.el+(q[1]-p[1])*0.008))}
+  else if(P.size==2){const o=[...P.entries()].find(([k])=>k!=e.pointerId)[1],d0=Math.hypot(p[0]-o[0],p[1]-o[1]),d1=Math.hypot(q[0]-o[0],q[1]-o[1]);r.dist=Math.max(30,r.dist*d0/Math.max(d1,1))}
+  P.set(e.pointerId,q);r.draw()});
+ const up=e=>P.delete(e.pointerId);cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+ cv.addEventListener('wheel',e=>{e.preventDefault();r.dist=Math.max(30,r.dist*(e.deltaY>0?1.1:0.9));r.draw()},{passive:false});
+ return r}
+const dedupe=a=>{const r=[];for(const p of a){const q=r[r.length-1];if(!q||Math.abs(q[0]-p[0])>1e-6||Math.abs(q[1]-p[1])>1e-6)r.push(p)}const f=r[0],l=r[r.length-1];if(r.length>1&&Math.abs(f[0]-l[0])<1e-6&&Math.abs(f[1]-l[1])<1e-6)r.pop();return r};
+function mesh3(r,s,O,e1,e2,e3,par,off){
+ const V=(a)=>a.map(p=>new THREE.Vector2(p[0],p[1])),sh=new THREE.Shape(V(dedupe(s.pts)));
+ s.holes.forEach(h=>sh.holes.push(new THREE.Path(V(dedupe(h)))));
+ const g=new THREE.ExtrudeGeometry(sh,{depth:T,bevelEnabled:false}),m=new THREE.Matrix4().makeBasis(new THREE.Vector3(...e1),new THREE.Vector3(...e2),new THREE.Vector3(...e3));
+ m.setPosition(O[0]-off[0],O[1]-off[1],O[2]-off[2]);g.applyMatrix4(m);
+ par.add(new THREE.Mesh(g,r.mat),new THREE.LineSegments(new THREE.EdgesGeometry(g,35),r.lm))}
+
+function build3ih(lb){
+ const r=mk3(),{B,P}=lb;
+ r.mat=r.mat||new THREE.MeshStandardMaterial({color:0xd9b27c,roughness:0.9,metalness:0,side:THREE.DoubleSide});r.lm=r.lm||new THREE.LineBasicMaterial({color:0x5a3a1a});
+ for(const c of[...r.grp.children]){r.grp.remove(c);c.geometry&&c.geometry.dispose()}
+ const PL=ihPlace(B,P.Li,P.Pi,P.Ai,P.Hl),lid=new THREE.Group(),pv=PL.pivot;
+ lid.position.set(...pv);lid.rotation.x=(+$('lo').value||0)*Math.PI/180;r.grp.add(lid);
+ PL.parts.forEach(q=>mesh3(r,q,q.O,q.e1,q.e2,q.e3,q.g=='l'?lid:r.grp,q.g=='l'?pv:[0,0,0]));
+ if(last3!=='ih'){last3='ih';r.dist=2.4*Math.max(P.Li+12,P.Pi+12,PL.Zt);r.tgt.set(0,0,PL.Zt/2)}}
+function build3rp(lb){
+ const r=mk3(),{B,P}=lb;
+ r.mat=r.mat||new THREE.MeshStandardMaterial({color:0xd9b27c,roughness:0.9,metalness:0,side:THREE.DoubleSide});r.lm=r.lm||new THREE.LineBasicMaterial({color:0x5a3a1a});
+ for(const c of[...r.grp.children]){r.grp.remove(c);c.geometry&&c.geometry.dispose()}
+ ihRampPlace(B).forEach(q=>mesh3(r,q,q.O,q.e1,q.e2,q.e3,r.grp,[0,0,0]));
+ if(last3!=='rp'){last3='rp';r.dist=2.4*Math.max(P.Li+12,P.Pi+12,P.Ai);r.tgt.set(0,0,P.Ai/2)}}
+function build3(lb){
+ if(lb.rp)return build3rp(lb);
+ if(lb.ih)return build3ih(lb);
+ const r=mk3(),{B,cl,P}=lb,S=B.S,a=B.a,b=B.b,X=[1,0,0],Y=[0,1,0],Z=[0,0,1],nX=[-1,0,0],nY=[0,-1,0],z0=[0,0,0];
+ r.mat=r.mat||new THREE.MeshStandardMaterial({color:0xd9b27c,roughness:0.9,metalness:0,side:THREE.DoubleSide});r.lm=r.lm||new THREE.LineBasicMaterial({color:0x5a3a1a});
+ for(const c of[...r.grp.children]){r.grp.remove(c);c.geometry&&c.geometry.dispose()}
+ const add=(s,O,e1,e2,e3,par,off)=>mesh3(r,s,O,e1,e2,e3,par||r.grp,off||z0);
+ let H,base;
+ if(cl){H=B.H;base=B.lid?4:3;
+  add(S[0],[0,0,-T],X,Y,Z);if(B.lid)add(S[3],[0,0,H],X,Y,Z);
+  add(S[1],[a,0,0],Y,Z,X);add(S[1],[-a,0,0],nY,Z,nX);
+  add(S[2],[0,b,0],nX,Z,Y);add(S[2],[0,-b,0],X,Z,nY)}
+ else{H=B.Hb;base=11;const hx=B.hx,Hl=B.Hl,Hr=B.Hr,piv=[0,-(b-5),H-8],lid=new THREE.Group();
+  add(S[0],[0,0,-T],X,Y,Z);add(S[1],[a,0,0],Y,Z,X);add(S[2],[-a,0,0],nY,Z,nX);
+  add(S[3],[0,b,0],nX,Z,Y);add(S[3],[0,-b,0],X,Z,nY);
+  add(S[9],[hx,piv[1],piv[2]],Y,Z,X);add(S[9],[-hx,piv[1],piv[2]],nY,Z,nX);
+  add(S[10],[a+T,piv[1]+T/2,piv[2]],X,Z,nY);add(S[10],[-(a+T),piv[1]+T/2,piv[2]],X,Z,nY);
+  lid.position.set(...piv);lid.rotation.x=(+$('lo').value||0)*Math.PI/180;r.grp.add(lid);
+  add(S[4],[0,0,H+Hl],X,Y,Z,lid,piv);add(S[5],[hx,0,H],Y,Z,X,lid,piv);add(S[6],[-hx,0,H],nY,Z,nX,lid,piv);
+  add(S[7],[0,b,H],nX,Z,Y,lid,piv);add(S[8],[0,-b,H+Hl-Hr],X,Z,nY,lid,piv)}
+ const D=B.D||{},ys=D.ys||[],xs=D.xs||[];
+ S.slice(base).forEach(s=>{if(s.n=='Divisória horizontal')ys.forEach(y=>add(s,[0,y+T/2,0],X,Z,nY));else if(s.n=='Divisória vertical')xs.forEach(x=>add(s,[x-T/2,0,0],Y,Z,X))});
+ const hh=cl?P.Ai:P.Ai,key=cl+'';
+ if(last3!==key){last3=key;r.dist=2.4*Math.max(P.Li+12,P.Pi+6,hh+6);r.tgt.set(0,0,hh/2)}}
+function show3d(){
+ $('cvm').style.display='none';$('cv').style.display='';
+ const r=mk3(),el=$('cv');
+ if(!r){el.textContent='Não foi possível carregar a visualização 3D (biblioteca indisponível).';return}
+ const w=el.clientWidth||600,h=Math.max(320,Math.round(w*0.72));r.renderer.setSize(w,h);r.camera.aspect=w/h;r.camera.updateProjectionMatrix();
+ $('lop').style.display=(lastB.cl||lastB.rp)?'none':'';build3(lastB);r.draw()}
+function setView(v){view=v;$('pv').style.display=v=='2d'?'':'none';$('zb').style.display=v=='2d'?'':'none';$('cv').style.display=v=='3d'?'':'none';if(v=='2d')$('cvm').style.display='none';
+ $('v2').className=v=='2d'?'':'o';$('v3').className=v=='3d'?'':'o';if(v=='2d')$('lop').style.display='none';if(v=='3d'&&lastB)show3d()}
+function fit(items,mw,mh){
+ const T0=(w,h)=>maxrects(items.slice(),w,h),ov0=L=>Math.max(0,L.W-mw)+Math.max(0,L.H-mh);
+ let r=T0(mw,mh);if(r)return r;
+ let ra=null,rb=null;
+ for(let h=mh+5;h<=mh*3&&!ra;h+=5)ra=T0(mw,h);
+ for(let w=mw+5;w<=mw*3&&!rb;w+=5)rb=T0(w,mh);
+ const c=[ra,rb].filter(Boolean).sort((p,q)=>ov0(p)-ov0(q));if(c.length)return c[0];
+ const rot=items.map(it=>({paths:it.paths.map(p=>({...p,pts:p.pts.map(([x,y])=>[y,-x])}))}));
+ const A=layout(items,mw),Bq=layout(rot,mw),ov=L=>Math.max(0,L.W-mw)+Math.max(0,L.H-mh);
+ return ov(Bq)<ov(A)?Bq:A}
+// ---- port mínimo do motor do boxes.py (burn=0) para a IntegratedHingeBox ----
+function ihBuild(x,y,h,hl,t,pm,sm,fw){
+ t=t||3;pm=pm||1.2;sm=sm||0.6;
+ const FS={space:fw||2*t,finger:fw||2*t,sur:2.0};
+ const p=pm*t,s=sm*t,pl=0.1*t,pinh=Math.sqrt((0.9*p)**2-t*t);
+ class Tur{constructor(){this.x=0;this.y=0;this.a=0;this.path=[[0,0]];this.holes=[]}
+  edge(l){if(!l)return;this.x+=l*Math.cos(this.a);this.y+=l*Math.sin(this.a);this.path.push([this.x,this.y])}
+  corner(d,r=0){if(Array.isArray(d)){[d,r]=d}
+   if(!r){this.a+=d*Math.PI/180;return}
+   const n=Math.max(1,Math.ceil(Math.abs(d)/6)),sg=d>0?1:-1,nx=-Math.sin(this.a)*sg,ny=Math.cos(this.a)*sg;
+   const cx=this.x+r*nx,cy=this.y+r*ny,step=d*Math.PI/180/n;let px=this.x-cx,py=this.y-cy;
+   for(let i=0;i<n;i++){const c=Math.cos(step),sn=Math.sin(step),qx=px*c-py*sn,qy=px*sn+py*c;px=qx;py=qy;this.x=cx+px;this.y=cy+py;this.path.push([this.x,this.y])}
+   this.a+=d*Math.PI/180}
+  poly(...args){args.forEach((g,i)=>{if(i%2){Array.isArray(g)?this.corner(g[0],g[1]):this.corner(g)}else this.edge(g)})}
+  w(px,py){const c=Math.cos(this.a),sn=Math.sin(this.a);return[this.x+px*c-py*sn,this.y+px*sn+py*c]}
+  hole(px,py,r){const [cx,cy]=this.w(px,py),pts=[];for(let i=0;i<48;i++){const a=i*2*Math.PI/48;pts.push([cx+r*Math.cos(a),cy+r*Math.sin(a)])}this.holes.push(pts)}
+  rhole(px,py,dx,dy){this.holes.push([[px-dx/2,py-dy/2],[px+dx/2,py-dy/2],[px+dx/2,py+dy/2],[px-dx/2,py+dy/2]].map(q=>this.w(q[0],q[1])))}
+  step(o){if(o>1e-5){this.corner(-90);this.edge(o);this.corner(90)}else if(o<-1e-5){this.corner(90);this.edge(-o);this.corner(-90)}}}
+ const calc=L=>{const sp=FS.space,f=FS.finger;let n=Math.floor((L-(FS.sur-1)*sp)/(sp+f));if(n===0&&L>f+t)n=1;let lo=L-n*(sp+f)+sp;if(n<=0){n=0;lo=L}return[n,lo]};
+ const E={};
+ const finger=pos=>({sw:pos?0:t,ew:pos?0:t,m:pos?t:0,call(T,L){let[n,lo]=calc(L),f=FS.finger;if(n===0&&lo>0.75*t){n=1;f=lo=lo/2}
+  T.edge(lo/2);for(let i=0;i<n;i++){if(i)T.edge(FS.space);pos?T.poly(0,-90,t,90,f,90,t,-90):T.poly(0,90,t,-90,f,-90,t,90)}T.edge(lo/2)}});
+ E.e={sw:0,ew:0,m:0,call(T,L){T.edge(L)}};E.f=finger(true);E.F=finger(false);
+ const hinge=rev=>({sw:rev?p+s:0,ew:rev?0:p+s,m:rev?0:p+s,call(T,l){
+  if(rev){T.hole(l+t,0,p);T.rhole(l+0.5*t,-0.5*pinh,t,pinh)}else{T.hole(-t,-s-p,p);T.rhole(-0.5*t,-s-p-0.5*pinh,t,pinh)}
+  const fin=l+t-p-s,po=[0,-180,t,[270,p+s],0,-90,fin];rev?T.poly(...po.slice().reverse()):T.poly(...po)}});
+ E.o=hinge(false);E.O=hinge(true);
+ const top=rev=>({sw:rev?pl+p+s:0,ew:rev?0:pl+p+s,m:rev?0:pl+p+s,call(T,l){
+  const fin=l+t-p-s-pl,po=[0,-180,t,-180,0,[-90,p+s+pl],0,90,fin];rev?T.poly(...po.slice().reverse()):T.poly(...po)}});
+ E.p=top(false);E.P=top(true);
+ E.q={sw:0,ew:0,m:pl+p+s,call(T,l){const po=[0,-90,pl+s+p-pinh,-90,t,90,pinh,90];T.poly(...po);T.poly(...([l+2*t].concat(po.slice().reverse())))}};
+ E.Q={sw:p+s,ew:p+s,m:0,call(T,L){T.edge(L)}};
+ const comp=(types,lens)=>{const ty=types.map(c=>E[c]);return{sw:ty[0].sw,ew:ty[ty.length-1].ew,m:Math.max(...ty.map(e=>e.m+e.sw))-ty[0].sw,call(T,L){let last=ty[0].sw;ty.forEach((e,i)=>{T.step(e.sw-last);e.call(T,lens[i]);last=e.ew})}}};
+ const sp=e=>e.sw+e.m;
+ function wall(wx,wy,spec,ign=[]){
+  const ed=(Array.isArray(spec)?spec:spec.split('')).map(c=>typeof c=='string'?E[c]:c),EE=[...ed,...ed],T=new Tur();
+  if(!ign.includes(7))T.x=sp(EE[7]);T.y=EE[0].m;T.path=[[T.x,T.y]];
+  [wx,wy,wx,wy].forEach((l,i)=>{let e1=EE[i],e2=EE[i+1];
+   if(ign.includes(2*i-1)||ign.includes(2*i-1+8))l+=EE[(i-1+8)%8].ew;
+   if(ign.includes(2*i)){l+=EE[i+1].sw;e2=E.e}
+   if(ign.includes(2*i+1))e1=E.e;
+   EE[i].call(T,l);T.edge(e2.sw);T.corner(90);T.edge(e1.ew)});
+  return{pts:T.path,holes:T.holes}}
+ const hy=E.O.sw,hy2=E.P.sw;
+ if(hl-hy2<0)throw new Error('Tampa baixa demais para a dobradiça');if(h-hy<0)throw new Error('Caixa baixa demais para a dobradiça');
+ const e1=comp(['F','e'],[h-hy,hy]),e2=comp(['e','F'],[hy,h-hy]);
+ return{hy,hy2,t,p,s,pinh,pieces:[
+  wall(y,h-hy,'FfOf',[2]),wall(y,hl-hy2,'pfFf',[1]),wall(y,h-hy,'Ffof',[5]),wall(y,hl-hy2,'PfFf',[6]),
+  wall(x,h,'FFeF'),wall(x,h,['F',e1,'e',e2]),wall(x,hl,'FFeF'),wall(x,hl-hy2,'FFqF'),wall(y,x,'ffff'),wall(y,x,'ffff')]}}
+
+// ---- posição 3D das peças (X largura, Y profundidade (frente=+Y), Z altura) ----
+function ihPlace(B,x,y,h,hl){
+ const t=B.t,D=y/2+t,Zb=h+t,Zt=h+hl+2*t,X=[1,0,0],Y=[0,1,0],Z=[0,0,1],nX=[-1,0,0],nY=[0,-1,0],nZ=[0,0,-1],P=B.pieces,parts=[];
+ const bc=h=>{const xs=h.map(q=>q[0]),ys=h.map(q=>q[1]);return[(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2]};
+ const add=(i,O,e1,e2,e3,g,holes)=>parts.push({n:i,pts:P[i].pts,holes:holes||P[i].holes,O,e1,e2,e3,g});
+ add(8,[-t-x/2,-t-y/2,t],Y,X,nZ,'b');add(9,[-t-x/2,-t-y/2,Zt],Y,X,nZ,'l');
+ add(4,[-x/2-t,y/2+t,0],X,Z,nY,'b');add(5,[-x/2-t,-y/2,0],X,Z,nY,'b');
+ add(6,[-x/2-t,y/2,Zt],X,nZ,Y,'l');add(7,[-x/2-t,-y/2-t,Zt],X,nZ,Y,'l');
+ const side=(i,li,O,e1,e2,e3)=>{const circle=P[i].holes[0],rect=P[i].holes[1],[cu,cv]=bc(circle);
+  add(i,O,e1,e2,e3,'b',P[i].holes.filter((q,k)=>k!=1));add(li,[O[0],O[1],Zb],e1,e2,e3,'l');
+  parts.push({n:'d',pts:circle.map(q=>[q[0]-cu,q[1]-cv]),holes:[rect.map(q=>[q[0]-cu,q[1]-cv])],O:[O[0]+cu*e1[0]+cv*e2[0],O[1]+cu*e1[1]+cv*e2[1],O[2]+cu*e1[2]+cv*e2[2]],e1,e2,e3,g:'l'})};
+ side(0,1,[x/2,-D,0],Y,Z,X);side(2,3,[-x/2,D,0],nY,Z,nX);
+ (B.divs||[]).forEach(s=>{for(let k=0;k<s.c;k++){if(s.n=='Divisória horizontal'){const y0=B.D.ys[k];parts.push({n:'dh',pts:s.pts,holes:s.holes,O:[0,y0+t/2,t],e1:X,e2:Z,e3:nY,g:'b'})}else{const x0=B.D.xs[k];parts.push({n:'dv',pts:s.pts,holes:s.holes,O:[x0-t/2,0,t],e1:Y,e2:Z,e3:X,g:'b'})}}});
+ return{parts,pivot:[0,-D,Zb],Zb,Zt}}
+
+
+// ---- divisórias e modos de corte da caixa com dobradiça embutida ----
+function ihDiv(B,P){
+ const t=B.t,x=P.Li,y=P.Pi,a=x/2,b=y/2,D=b+t;
+ const Dv=mkDiv({Li:x,Pi:y,w:P.w,nh:P.nh,nv:P.nv,hd:P.hd,dTop:false},a,b,P.Ai);
+ B.D=Dv;B.divs=Dv.pieces;
+ Dv.plateHoles.forEach(h=>B.pieces[8].holes.push(h.map(q=>[q[1]+t+b,q[0]+t+a])));
+ Dv.lwHoles.forEach(h=>{B.pieces[0].holes.push(h.map(q=>[q[0]+D,q[1]+t]));B.pieces[2].holes.push(h.map(q=>[D-q[0],q[1]+t]))});
+ Dv.swHoles.forEach(h=>{const m=h.map(q=>[q[0]+a+t,q[1]+t]);B.pieces[4].holes.push(m);B.pieces[5].holes.push(m)});
+ return B}
+function mkItemsIH(B,mode,P){
+ const R='#ff0000',t=B.t,x=P.Li,y=P.Pi,pc=t+y/2,I=[],Pz=B.pieces,id=q=>q;
+ const one=s=>({paths:[{pts:s.pts,color:R,closed:true},...s.holes.map(h=>({pts:h,color:R,closed:true}))]});
+ const divs=()=>(B.divs||[]).forEach(s=>{for(let k=0;k<s.c;k++)I.push(one(s))});
+ if(mode=='sep'){Pz.forEach(s=>I.push(one(s)));divs();return I}
+ const g=parts=>({paths:[...unite(parts.map(([s,f])=>s.pts.map(f))).map(p=>({...p,color:R})),...parts.flatMap(([s,f])=>s.holes.map(h=>({pts:h.map(f),color:R,closed:true})))]});
+ const vt=s=>Math.max(...s.pts.map(q=>q[1]));
+ const PLT=q=>[q[0]-pc,q[1]-t-x/2],Wa=([u,v])=>[u-pc,x/2+v],Wb=([u,v])=>[-(u-pc),-x/2-v];
+ const Xl=([u,v])=>[-y/2-v,u-t-x/2],Xr=([u,v])=>[y/2+v,x/2-(u-t)];
+ const v2=vt(Pz[1]),v4=vt(Pz[3]),La=([u,v])=>[u-pc,x/2+(v2-v)],Lb=([u,v])=>[-(u-pc),-x/2-(v4-v)];
+ const base=[[Pz[8],PLT],[Pz[0],Wa],[Pz[2],Wb]],lid=[[Pz[9],PLT],[Pz[1],La],[Pz[3],Lb]];
+ if(mode=='uni'){base.push([Pz[5],Xl],[Pz[4],Xr]);lid.push([Pz[7],Xl],[Pz[6],Xr])}
+ I.push(g(base),g(lid));
+ if(mode=='mid'){const v5=vt(Pz[4]);I.push(g([[Pz[4],id],[Pz[5],([u,v])=>[u,2*v5-v]]]));I.push(one(Pz[6]),one(Pz[7]))}
+ divs();return I}
+
+
+
+// ---- caixa fechada em cunha: fundo plano + tampa inclinada; altura sobe linearmente da frente (h0) ao fundo (H) ----
+function mkDivR(P,a,b,prof,H,lid){
+ const{Li,Pi,w}=P,nh=P.nh||0,nv=P.nv||0,dt=!!(P.dTop&&lid),cap=dt?H:(P.hd||H),pieces=[],pH=[],lwH=[],swHf=[],swHb=[],tH=[],o={pieces,plateHoles:pH,lwHoles:lwH,swHoles:swHf,swHf,swHb,topHoles:tH};
+ if(!(nh+nv))return o;
+ const h0=prof(-b),dh=prof(b)-h0,Ls=Math.hypot(Pi,dh),th=Math.atan2(dh,Pi),sn=Math.sin(th),cs=Math.cos(th),on=[-sn,cs];
+ const ys=posn(Pi,nh),xs=posn(Li,nv),zt=y=>Math.min(cap,prof(y)),zh=y=>zt(y-T/2),sAt=y=>(y+b)/cs-Ls/2;o.ys=ys;o.xs=xs;
+ const tabsOf=hd=>{const nE=odd(hd,w),sE=hd/nE,et=[];for(let i=1;i<nE;i+=2)et.push([i*sE,(i+1)*sE]);return{nE,et}};
+ if(nh){const nB=odd(Li,w),tb=tabsAlong(Li,w,[]),tt=dt?tabsAlong(Li,w,xs):[];
+  ys.forEach(y=>{const hd=zh(y),{nE,et}=tabsOf(hd),Th=prof(y)-hd+T/cs,ev=[...tt.map(t=>({t:1,a:t[0],b:t[1]})),...xs.map(c=>({t:0,a:c-T/2,b:c+T/2}))].sort((p,q)=>q.b-p.b),top=[];
+   ev.forEach(e=>{if(e.t)top.push([e.b,hd],[e.b,hd+Th],[e.a,hd+Th],[e.a,hd]);else top.push([e.b,hd],[e.b,hd/2],[e.a,hd/2],[e.a,hd])});
+   pieces.push({n:'Divisória horizontal',c:1,y,pts:[...fe([-a,0],[a,0],nB,false,[0,-1]),...fe([a,0],[a,hd],nE,false,[1,0]),...top,...fe([-a,hd],[-a,0],nE,false,[-1,0])],holes:[]});
+   tb.forEach(([t0,t1])=>pH.push(rect((t0+t1)/2,y,t1-t0,T)));
+   tt.forEach(([t0,t1])=>tH.push(rect((t0+t1)/2,sAt(y),t1-t0,T/cs)));
+   et.forEach(([v0,v1])=>lwH.push(rect(y,(v0+v1)/2,T,v1-v0)))})}
+ if(nv){const tbv=tabsAlong(Pi,w,ys),zb=zt(b),zf=zt(-b),eb=tabsOf(zb),ef=tabsOf(zf),ev=[];
+  tbv.forEach(t=>ev.push({t:1,a:t[0],b:t[1]}));ys.forEach(c=>ev.push({t:0,a:c-T/2,b:c+T/2,d:zh(c)/2}));ev.sort((p,q)=>p.a-q.a);
+  const bot=[[-b,0]];ev.forEach(e=>{if(e.t)bot.push([e.a,0],[e.a,-T],[e.b,-T],[e.b,0]);else bot.push([e.a,0],[e.a,e.d],[e.b,e.d],[e.b,0])});bot.push([b,0]);
+  const top=[],ttv=dt?tabsAlong(Ls,w,[]):[],pos=s=>[-b+(s+Ls/2)*cs,h0+(s+Ls/2)*sn];
+  if(dt)[...ttv].sort((p,q)=>q[1]-p[1]).forEach(([t0,t1])=>{const p1=pos(t1),p0=pos(t0);top.push(p1,[p1[0]+T*on[0],p1[1]+T*on[1]],[p0[0]+T*on[0],p0[1]+T*on[1]],p0)});
+  else if(cap<prof(b)&&cap>h0&&dh>0)top.push([-b+(cap-h0)*Pi/dh,cap]);
+  pieces.push({n:'Divisória vertical',c:nv,pts:[...bot,...fe([b,0],[b,zb],eb.nE,false,[1,0]),...top,...fe([-b,zf],[-b,0],ef.nE,false,[-1,0])],holes:[]});
+  xs.forEach(x=>{tbv.forEach(([t0,t1])=>pH.push(rect(x,(t0+t1)/2,T,t1-t0)));ttv.forEach(([t0,t1])=>tH.push(rect(x,(t0+t1)/2,T,t1-t0)));
+   eb.et.forEach(([v0,v1])=>swHb.push(rect(x,(v0+v1)/2,T,v1-v0)));ef.et.forEach(([v0,v1])=>swHf.push(rect(x,(v0+v1)/2,T,v1-v0)))})}
+ return o}
+function buildRamp(P){
+ const{Li,Pi,Ai,Hl,w}=P,h0=Hl,H=Ai,lid=P.lid!==false,a=Li/2,b=Pi/2,dh=H-h0,Ls=Math.hypot(Pi,dh),th=Math.atan2(dh,Pi),sn=Math.sin(th),cs=Math.cos(th);
+ const nL=odd(Pi,w),nS=odd(Li,w),nLs=odd(Ls,w),nEf=odd(h0,w),nEb=odd(H,w),prof=y=>h0+dh*(y+b)/Pi,D=mkDivR(P,a,b,prof,H,lid),o=[-sn,cs];
+ const bp={pts:[...fe([-a,-b],[a,-b],nS,false,[0,-1]),...fe([a,-b],[a,b],nL,false,[1,0]),...fe([a,b],[-a,b],nS,false,[0,1]),...fe([-a,b],[-a,-b],nL,false,[-1,0])],holes:D.plateHoles};
+ const hs=Ls/2,rp=lid?{pts:[...fe([-a,-hs],[a,-hs],nS,false,[0,-1]),...fe([a,-hs],[a,hs],nLs,false,[1,0]),...fe([a,hs],[-a,hs],nS,false,[0,1]),...fe([-a,hs],[-a,-hs],nLs,false,[-1,0])],holes:D.topHoles}:null;
+ const lw={pts:[[-b-T,-T],...fe([-b,0],[b,0],nL,true,[0,-1]),[b+T,-T],[b+T,0],...fe([b,0],[b,H],nEb,false,[1,0]),
+  ...(lid?[[b+T,H],[b+T+T*o[0],H+T*o[1]],...fe([b,H],[-b,h0],nLs,true,o),[-b-T+T*o[0],h0+T*o[1]],[-b-T,h0]]:[]),...fe([-b,h0],[-b,0],nEf,false,[-1,0]),[-b-T,0]],holes:D.lwHoles};
+ const sw=(hh,nE,hl)=>({pts:[...fe([-a,0],[a,0],nS,true,[0,-1]),[a,0],...fe([a,0],[a,hh],nE,true,[1,0]),[a,hh],...(lid?fe([a,hh],[-a,hh],nS,true,[0,1]):[]),[-a,hh],...fe([-a,hh],[-a,0],nE,true,[-1,0]),[-a,0]],holes:hl});
+ return{bp,lw,fw:sw(h0,nEf,D.swHf),bw:sw(H,nEb,D.swHb),rp,divs:D.pieces,D,a,b,H,h0,Ls,th,lid,prof,nL,nS,nLs}}
+function mkItemsR(B,mode){
+ const R='#ff0000',{bp,lw,fw,bw,rp,a,b,H,Ls,lid}=B,T3=T,id=p=>p,I=[];
+ const one=s=>({paths:[{pts:s.pts,color:R,closed:true},...s.holes.map(h=>({pts:h,color:R,closed:true}))]});
+ const g=parts=>({paths:[...unite(parts.map(([s,f])=>s.pts.map(f))).map(p=>({...p,color:R})),...parts.flatMap(([s,f])=>s.holes.map(h=>({pts:h.map(f),color:R,closed:true})))]});
+ const rot=q=>({paths:q.paths.map(p=>({...p,pts:p.pts.map(([x,y])=>[-y,x])}))});
+ const divs=()=>B.divs.forEach(s=>{for(let k=0;k<s.c;k++)I.push(one(s))});
+ if(mode=='sep'){I.push(one(bp),one(lw),one(lw),one(fw),one(bw));if(lid)I.push(one(rp));divs();return I}
+ const RW=([u,v])=>[a+T3+v,u],LW=([u,v])=>[-(a+T3+v),u],TS=([x,v])=>[x,b+T3+v],BS=([x,v])=>[x,-(b+T3+v)];
+ if(mode=='uni'){I.push(g([[bp,id],[lw,RW],[lw,LW],[bw,TS],[fw,BS],...(lid?[[rp,([x,v])=>[x,b+2*T3+H+(v+Ls/2)]]]:[])]));divs();return I}
+ const hs=Ls/2;
+ I.push(rot(g([[bp,id],[lw,RW],[lw,LW]])));
+ if(lid)I.push(g([[rp,id],[bw,([x,v])=>[x,hs+T3+v]],[fw,([x,v])=>[x,-(hs+T3+v)]]]));else I.push(one(fw),one(bw));
+ divs();return I}
+function ihRampPlace(B){
+ const{a,b,H,h0,th,rp,lid}=B,t=T,X=[1,0,0],Y=[0,1,0],Z=[0,0,1],nX=[-1,0,0],nY=[0,-1,0],P=[],mz=(h0+H)/2,sn=Math.sin(th),cs=Math.cos(th);
+ const add=(s,O,e1,e2,e3)=>P.push({pts:s.pts,holes:s.holes,O,e1,e2,e3,g:'b'});
+ const mirr=s=>({pts:s.pts.map(p=>[-p[0],p[1]]),holes:s.holes.map(h=>h.map(p=>[-p[0],p[1]]))});
+ add(B.bp,[0,0,-t],X,Y,Z);
+ add(B.lw,[a,0,0],Y,Z,X);add(mirr(B.lw),[-a,0,0],nY,Z,nX);
+ add(B.fw,[0,-b,0],X,Z,nY);add(B.bw,[0,b,0],nX,Z,Y);
+ if(lid)add(rp,[0,0,mz],X,[0,cs,sn],[0,-sn,cs]);
+ B.divs.forEach(s=>{if(s.n=='Divisória horizontal')add(s,[0,s.y+t/2,0],X,Z,nY);else B.D.xs.forEach(x=>add(s,[x-t/2,0,0],Y,Z,X))});
+ return P}
+
+const VR={bs:[['lat','Dobradiça lateral'],['tr','Dobradiça traseira']],cf:[['cub','Formato cubo'],['cun','Formato cunha']]};
+function syncVr(){const t=$('tp').value,vr=$('vr');if(vr._t!==t){vr.innerHTML=VR[t].map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');vr._t=t}}
+function curType(){const t=$('tp').value,v=$('vr').value;return t=='bs'?(v=='tr'?'ih':'hg'):(v=='cun'?'rp':'cl')}
+
+function run(){
+ syncVr();const un=$('un').value,tp=curType(),ex=un=='ext',cl=tp=='cl',ih=tp=='ih',rp=tp=='rp';
+ const ln=$('lid').value!='no'||(tp!='cl'&&tp!='rp'),off=(t,u,l)=>u=='ext'?(t=='cl'?{Li:6,Pi:6,Ai:l?6:3,Hl:0}:t=='rp'?{Li:6,Pi:6,Ai:l?6:3,Hl:l?6:3}:t=='ih'?{Li:6,Pi:6,Ai:3,Hl:3}:{Li:12,Pi:6,Ai:6,Hl:3}):{Li:0,Pi:0,Ai:0,Hl:0};
+ if(un!==pu||tp!==pt||ln!==pl){const o=off(pt,pu,pl),n=off(tp,un,ln);['Li','Pi','Ai','Hl'].forEach(k=>$(k).value=+$(k).value-o[k]+n[k]);if(tp!==pt){const d={Li:100,Pi:150,Ai:30,Hl:10};['Li','Pi','Ai','Hl'].forEach(k=>$(k).value=d[k]+n[k]);if(ih){$('pm').value=1.3;$('sm').value=1}}pu=un;pt=tp;pl=ln}
+ $('lHl').style.display=cl?'none':'';['lNh','lNv','lHd','lMode','lW'].forEach(k=>$(k).style.display='');['lPm','lSm'].forEach(k=>$(k).style.display=ih?'':'none');
+ const o=off(tp,un,ln),v=k=>+$(k).value,e=ex?'externa':'interna';
+ const names=rp?(ex?['Largura externa','Profundidade externa','Altura externa do fundo (máxima)','Altura externa da frente (mínima)']:['Largura interna','Profundidade interna','Altura interna do fundo (máxima)','Altura interna da frente (mínima)']):ih?(ex?['Largura externa','Profundidade externa','Altura externa da base (com fundo)','Altura externa da tampa (com topo)']:['Largura interna','Profundidade interna','Altura interna da base','Altura interna da tampa']):cl?['Largura '+e,'Profundidade '+e,'Altura '+e]:ex?['Largura externa (com as orelhas)','Profundidade externa','Altura externa total','Altura externa da tampa']:['Largura interna','Profundidade interna','Altura interna total (tampa fechada)','Altura interna da tampa'];
+ const P={Li:v('Li')-o.Li,Pi:v('Pi')-o.Pi,Ai:v('Ai')-o.Ai,Hl:cl?0:v('Hl')-o.Hl,w:v('w'),nh:Math.max(0,v('nh')|0),nv:Math.max(0,v('nv')|0),hd:v('hd')||0,lid:ln,dTop:(cl||rp)&&ln&&$('dt').value=='yes'};
+ const mi=cl?{Li:12,Pi:12,Ai:12,Hl:0}:rp?{Li:12,Pi:20,Ai:Math.max(12,P.Hl||0),Hl:10}:ih?{Li:30,Pi:40,Ai:Math.ceil(((v('pm')||1.2)+(v('sm')||0.6))*T)+8,Hl:Math.ceil(((v('pm')||1.2)+(v('sm')||0.6))*T+0.3)+1}:{Li:20,Pi:60,Ai:Math.max(5,P.Hl||0)+16,Hl:5},m={};
+ ['Li','Pi','Ai','Hl'].forEach(k=>m[k]=mi[k]+o[k]);
+ const ks=cl?['Li','Pi','Ai']:['Li','Pi','Ai','Hl'],er=[];
+ ks.forEach((k,i)=>{$('t'+k).textContent=`${names[i]} (mín. ${m[k]} mm)`;$(k).min=m[k];if(!(v(k)>=m[k]))er.push(`${names[i]}: mínimo ${m[k]} mm`)});
+ $('tw').textContent='Largura alvo dos dentes (mín. 5 mm)';
+ if(!(P.w>=5))er.push('Dentes: mínimo 5 mm');
+ if(ih){if(!(v('pm')>=1.2))er.push('Raio do pino: mínimo 1,2 × espessura');if(!(v('sm')>=0.6))er.push('Anel da dobradiça: mínimo 0,6 × espessura')}
+ const Hc=(cl||ih||rp)?P.Ai:P.Ai-P.Hl;$('thd').textContent=`Altura das divisórias (mín. 12, máx. ${Hc>0?Hc:'-'} mm; vazio = máx.)`;$('lLid').style.display=(cl||rp)?'':'none';$('lDt').style.display=(cl||rp)&&ln?'':'none';$('hd').disabled=!!P.dTop;if(P.dTop){P.hd=0;$('thd').textContent='Altura das divisórias (altura total, fixa na tampa)'}
+ if(P.nh+P.nv>0){const cmp=(len,n)=>(len-n*T)/(n+1);
+  if(P.hd>Hc)er.push(`Altura das divisórias: máximo ${Hc} mm`);
+  if((P.hd||Hc)<12)er.push('Altura das divisórias: mínimo 12 mm');
+  if(cmp(P.Pi,P.nh)<10)er.push('Divisórias horizontais demais para a profundidade (compartimento mín. 10 mm)');
+  if(cmp(P.Li,P.nv)<10)er.push('Divisórias verticais demais para a largura (compartimento mín. 10 mm)')}
+ if(er.length){$('warn').textContent=er.join(' · ');return}
+ const mw=v('sw')||380,mh=v('sh')||300;
+ let L,info;
+ if(cl){const B=buildClosed(P);lastB={B,cl:true,P};L=fit(mkItemsC(B,$('mode').value),mw,mh);
+  info=`Externo: ${P.Li+6}×${P.Pi+6}×${P.Ai+(P.lid?6:3)} mm${P.lid?'':' (sem tampa)'}<br>Dentes: ${B.nL} (prof.), ${B.nS} (larg.), ${B.nE} (alt.)`}
+ else if(rp){const B=buildRamp(P);lastB={B,cl:false,rp:true,P};L=fit(mkItemsR(B,$('mode').value),mw,mh);
+  const ex6=P.lid?6:3;info=`Externo: ${P.Li+6}×${P.Pi+6}×${P.Ai+ex6} mm (altura ${P.Hl+ex6} mm na frente → ${P.Ai+ex6} mm no fundo)<br>Inclinação: ${(B.th*180/Math.PI).toFixed(1)}° · face inclinada ${B.Ls.toFixed(1)} mm`}
+ else if(ih){const B=ihBuild(P.Li,P.Pi,P.Ai,P.Hl,3,v('pm'),v('sm'),P.w),R='#ff0000';lastB={B,cl:false,ih:true,P};
+  ihDiv(B,P);L=fit(mkItemsIH(B,$('mode').value,P),mw,mh);
+  info=`Externo: ${P.Li+6}×${P.Pi+6}×${P.Ai+P.Hl+6} mm (a dobradiça sai ${B.hy.toFixed(1)} mm atrás)<br>Base ${P.Ai+3} mm · tampa ${P.Hl+3} mm · 10 peças`}
+ else{const B=build(P);lastB={B,cl:false,P};L=fit(mkItems(B,$('mode').value),mw,mh);
+  info=`Base: ${B.ext[0]}×${B.ext[1]} mm · com orelhas: ${B.lidW}×${B.ext[1]} mm · altura total ${B.ext[2]} mm<br>Lateral da base ${B.Hw} mm · tampa ${B.Hlid} mm<br>Dentes: ${B.nL} (prof.), ${B.nS} (larg.)`}
+ cur=svg(L);$('pv').innerHTML=svg(L,true);
+ $('info').innerHTML=info+`<br>Chapa necessária: ${L.W.toFixed(0)}×${L.H.toFixed(0)} mm`;
+ $('warn').textContent=(L.W>mw||L.H>mh)?`O layout ultrapassa a área da cortadora (${mw}×${mh} mm): precisa de ${L.W.toFixed(0)}×${L.H.toFixed(0)} mm.`:'';
+ if(view=='3d')show3d();
+}
+document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',run));
+const zoom=()=>{const z=$('zs').value;$('zv').textContent=z+'%';const sv=$('pv').firstElementChild;if(sv)sv.style.width=z+'%'};
+$('v2').onclick=()=>setView('2d');$('v3').onclick=()=>setView('3d');window.addEventListener('resize',()=>{if(view=='3d'&&lastB)show3d()});
+new MutationObserver(zoom).observe($('pv'),{childList:true});
+$('zm').onclick=()=>{$('zs').value=Math.max(10,+$('zs').value-10);zoom()};
+$('zp').onclick=()=>{$('zs').value=Math.min(200,+$('zs').value+10);zoom()};
+$('cp').onclick=async()=>{try{await navigator.clipboard.writeText(cur);$('cp').textContent='Copiado!'}catch(e){$('cp').textContent='Cópia indisponível'}};
+$('dl').onclick=async()=>{const fn=`caixa-${$('Li').value}x${$('Pi').value}x${$('Ai').value}.svg`;
+ try{if(typeof claude!=='undefined'&&claude.use){const dl=await claude.use('downloads');if(dl){await dl.save({filename:fn,data:cur});return}}}catch(e){}
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([cur],{type:'image/svg+xml'}));a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+run();
+</script>
+</body>
+</html>
